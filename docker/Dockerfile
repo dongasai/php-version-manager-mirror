@@ -84,7 +84,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:$PVM_MIRROR_PORT/ || exit 1
 
 # 创建启动脚本
-COPY --chown=pvm-mirror:pvm-mirror docker/pvm-mirror/entrypoint.sh /app/entrypoint.sh
+COPY --chown=pvm-mirror:pvm-mirror docker/entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
 # 启动命令

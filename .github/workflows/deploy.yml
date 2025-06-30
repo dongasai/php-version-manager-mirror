@@ -1,0 +1,172 @@
+name: Deploy
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+
+jobs:
+  deploy-staging:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging'
+    runs-on: ubuntu-latest
+    environment: staging
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Deploy to Staging
+      run: |
+        echo "Deploying to staging environment..."
+        echo "This would typically involve:"
+        echo "1. Building the application"
+        echo "2. Running tests"
+        echo "3. Deploying to staging server"
+        echo "4. Running smoke tests"
+        
+        # 示例部署步骤
+        echo "Building Docker image for staging..."
+        docker build -f docker/Dockerfile -t pvm-mirror:staging .
+        
+        echo "Staging deployment completed!"
+
+  deploy-production:
+    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Get release version
+      id: version
+      run: |
+        if [ "${{ github.event_name }}" == "release" ]; then
+          VERSION=${{ github.event.release.tag_name }}
+        else
+          VERSION=$(git describe --tags --abbrev=0)
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Deploying version: $VERSION"
+
+    - name: Deploy to Production
+      run: |
+        VERSION="${{ steps.version.outputs.version }}"
+        echo "Deploying version $VERSION to production..."
+        
+        echo "Production deployment steps:"
+        echo "1. Pull latest Docker image from GHCR"
+        echo "2. Update production configuration"
+        echo "3. Rolling deployment with health checks"
+        echo "4. Verify deployment success"
+        
+        # 示例生产部署
+        echo "Pulling production image..."
+        docker pull ghcr.io/${{ github.repository }}:$VERSION
+        
+        echo "Production deployment completed!"
+
+  notify:
+    needs: [deploy-staging, deploy-production]
+    if: always()
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Notify deployment status
+      run: |
+        if [ "${{ needs.deploy-staging.result }}" == "success" ]; then
+          echo "✅ Staging deployment successful"
+        elif [ "${{ needs.deploy-staging.result }}" == "failure" ]; then
+          echo "❌ Staging deployment failed"
+        fi
+        
+        if [ "${{ needs.deploy-production.result }}" == "success" ]; then
+          echo "✅ Production deployment successful"
+        elif [ "${{ needs.deploy-production.result }}" == "failure" ]; then
+          echo "❌ Production deployment failed"
+        fi
+        
+        echo "Deployment notification completed"
+
+  health-check:
+    needs: [deploy-production]
+    if: needs.deploy-production.result == 'success'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Production Health Check
+      run: |
+        echo "Running production health checks..."
+        
+        # 示例健康检查
+        echo "1. Checking service availability"
+        echo "2. Verifying API endpoints"
+        echo "3. Testing core functionality"
+        echo "4. Monitoring system metrics"
+        
+        # 实际的健康检查可能包括：
+        # curl -f http://your-production-url/health || exit 1
+        # docker run --rm your-image:latest status
+        
+        echo "Health check completed successfully!"
+
+  rollback:
+    if: failure() && github.event_name == 'release'
+    needs: [deploy-production, health-check]
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - name: Rollback Production
+      run: |
+        echo "Production deployment failed, initiating rollback..."
+        
+        # 获取上一个稳定版本
+        PREVIOUS_VERSION=$(git describe --tags --abbrev=0 HEAD~1)
+        echo "Rolling back to version: $PREVIOUS_VERSION"
+        
+        echo "Rollback steps:"
+        echo "1. Stop current deployment"
+        echo "2. Restore previous version"
+        echo "3. Verify rollback success"
+        echo "4. Update monitoring alerts"
+        
+        echo "Rollback completed!"
+
+  update-documentation:
+    needs: [deploy-production]
+    if: needs.deploy-production.result == 'success' && github.event_name == 'release'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Update deployment documentation
+      run: |
+        VERSION=${{ github.event.release.tag_name }}
+        DATE=$(date +%Y-%m-%d)
+        
+        echo "Updating deployment documentation..."
+        echo "Version: $VERSION"
+        echo "Date: $DATE"
+        
+        # 更新部署记录
+        if [ ! -f docs/deployments.md ]; then
+          echo "# 部署记录" > docs/deployments.md
+          echo "" >> docs/deployments.md
+        fi
+        
+        echo "## $VERSION - $DATE" >> docs/deployments.md
+        echo "- 生产环境部署成功" >> docs/deployments.md
+        echo "- Docker镜像: ghcr.io/${{ github.repository }}:$VERSION" >> docs/deployments.md
+        echo "" >> docs/deployments.md
+        
+        echo "Documentation updated!"

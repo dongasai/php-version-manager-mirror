@@ -1,0 +1,148 @@
+name: Version Management
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+        - patch
+        - minor
+        - major
+      pre_release:
+        description: 'Create pre-release'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Install semver
+      run: npm install -g semver
+
+    - name: Get current version
+      id: current_version
+      run: |
+        # 从git tags获取最新版本
+        LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+        echo "current_version=$LATEST_TAG" >> $GITHUB_OUTPUT
+        echo "Current version: $LATEST_TAG"
+
+    - name: Calculate new version
+      id: new_version
+      run: |
+        CURRENT="${{ steps.current_version.outputs.current_version }}"
+        TYPE="${{ github.event.inputs.version_type }}"
+        
+        # 移除v前缀进行计算
+        CURRENT_CLEAN=${CURRENT#v}
+        
+        # 计算新版本
+        NEW_VERSION=$(semver -i $TYPE $CURRENT_CLEAN)
+        NEW_TAG="v$NEW_VERSION"
+        
+        echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+        echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+        echo "New version: $NEW_TAG"
+
+    - name: Update CHANGELOG
+      run: |
+        NEW_VERSION="${{ steps.new_version.outputs.new_version }}"
+        NEW_TAG="${{ steps.new_version.outputs.new_tag }}"
+        DATE=$(date +%Y-%m-%d)
+        
+        # 创建新的CHANGELOG条目
+        if [ -f CHANGELOG.md ]; then
+          # 备份原文件
+          cp CHANGELOG.md CHANGELOG.md.bak
+          
+          # 创建新的CHANGELOG
+          echo "# 更新日志" > CHANGELOG.md.new
+          echo "" >> CHANGELOG.md.new
+          echo "本文档记录了PHP Version Manager Mirror项目的所有重要变更。" >> CHANGELOG.md.new
+          echo "" >> CHANGELOG.md.new
+          echo "格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，" >> CHANGELOG.md.new
+          echo "版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。" >> CHANGELOG.md.new
+          echo "" >> CHANGELOG.md.new
+          echo "## [未发布]" >> CHANGELOG.md.new
+          echo "" >> CHANGELOG.md.new
+          echo "## [$NEW_VERSION] - $DATE" >> CHANGELOG.md.new
+          echo "" >> CHANGELOG.md.new
+          echo "### 新增" >> CHANGELOG.md.new
+          echo "- 版本 $NEW_VERSION 发布" >> CHANGELOG.md.new
+          echo "" >> CHANGELOG.md.new
+          
+          # 添加原有内容（跳过标题部分）
+          tail -n +7 CHANGELOG.md.bak >> CHANGELOG.md.new
+          
+          # 替换原文件
+          mv CHANGELOG.md.new CHANGELOG.md
+        fi
+
+    - name: Commit version changes
+      run: |
+        NEW_TAG="${{ steps.new_version.outputs.new_tag }}"
+        
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        git add CHANGELOG.md
+        git commit -m "chore: bump version to $NEW_TAG" || echo "No changes to commit"
+
+    - name: Create and push tag
+      run: |
+        NEW_TAG="${{ steps.new_version.outputs.new_tag }}"
+        
+        git tag -a $NEW_TAG -m "Release $NEW_TAG"
+        git push origin $NEW_TAG
+        git push origin HEAD
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.new_version.outputs.new_tag }}
+        name: Release ${{ steps.new_version.outputs.new_tag }}
+        body: |
+          ## 版本 ${{ steps.new_version.outputs.new_version }}
+          
+          这是 PHP Version Manager Mirror 的 ${{ steps.new_version.outputs.new_version }} 版本发布。
+          
+          ### 安装方式
+          
+          #### Docker（推荐）
+          ```bash
+          docker pull ghcr.io/${{ github.repository }}:${{ steps.new_version.outputs.new_tag }}
+          docker pull ghcr.io/${{ github.repository }}:latest
+          ```
+          
+          #### 源码安装
+          下载下方的源码包，解压后运行：
+          ```bash
+          ./bin/pvm-mirror help
+          ```
+          
+          详细更新内容请查看 [CHANGELOG.md](CHANGELOG.md)
+        draft: false
+        prerelease: ${{ github.event.inputs.pre_release }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
