@@ -1,0 +1,40 @@
+services:
+  pvm-mirror:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
+    container_name: pvm-mirror-dev
+    ports:
+      - "34403"
+    volumes:
+      # 映射项目的data目录到容器的data目录
+      - pvm_mirror_data:/app/data
+      # 映射项目的logs目录到容器的logs目录
+      - pvm_mirror_logs:/app/logs
+    environment:
+      # 设置为开发模式
+      - PVM_MIRROR_ENV=development
+      # 设置日志级别为详细模式
+      - PVM_MIRROR_LOG_LEVEL=debug
+      # 设置数据目录
+      - PVM_MIRROR_DATA_DIR=/app/data
+      # 设置日志目录
+      - PVM_MIRROR_LOG_DIR=/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:34403/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - pvm-mirror-network
+
+networks:
+  pvm-mirror-network:
+    driver: bridge
+
+volumes:
+  # 如果需要持久化数据，可以使用命名卷
+  pvm_mirror_data:
+  pvm_mirror_logs:

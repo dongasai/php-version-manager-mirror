@@ -1,0 +1,73 @@
+services:
+  pvm-mirror:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
+    container_name: pvm-mirror-dev
+    ports:
+      - "${PVM_MIRROR_PORT:-34403}:${PVM_MIRROR_PORT:-34403}"
+    env_file:
+      - .env
+    volumes:
+      # 映射项目的data目录到容器的data目录
+      - ../data:/app/data
+      # 映射项目的logs目录到容器的logs目录
+      - ../logs:/app/logs
+      # 映射项目的config目录到容器的config目录
+      - ../config:/app/config
+      # 映射项目的cache目录到容器的cache目录
+      - ../cache:/app/cache
+      # 映射项目的public目录到容器的public目录
+      - ../public:/app/public
+      # 映射源代码目录用于开发调试
+      - ../src:/app/src
+      - ../bin:/app/bin
+    environment:
+      # 基础配置
+      - PVM_MIRROR_ENV=development
+      - PVM_MIRROR_DEBUG=true
+
+      # 目录配置
+      - PVM_MIRROR_DATA_DIR=/app/data
+      - PVM_MIRROR_LOG_DIR=/app/logs
+      - PVM_MIRROR_CACHE_DIR=/app/cache
+
+      # 日志配置
+      - PVM_MIRROR_LOG_LEVEL=debug
+
+      # 服务器配置
+      - PVM_MIRROR_HOST=0.0.0.0
+      - PVM_MIRROR_PORT=34403
+      - PVM_MIRROR_PUBLIC_URL=http://localhost:34403
+      - PVM_MIRROR_MAX_CONNECTIONS=50
+      - PVM_MIRROR_TIMEOUT=30
+
+      # HTTPS配置（开发环境默认关闭）
+      - PVM_MIRROR_ENABLE_HTTPS=false
+
+      # 缓存配置（开发环境使用较小的缓存）
+      - PVM_MIRROR_CACHE_SIZE=52428800  # 50MB
+      - PVM_MIRROR_CACHE_TTL=60         # 1分钟，便于测试
+
+      # 同步配置（开发环境更频繁的同步）
+      - PVM_MIRROR_SYNC_INTERVAL=1      # 1小时
+      - PVM_MIRROR_MAX_RETRIES=3
+      - PVM_MIRROR_RETRY_INTERVAL=60    # 1分钟
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:34403/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - pvm-mirror-network
+
+networks:
+  pvm-mirror-network:
+    driver: bridge
+
+volumes:
+  # 如果需要持久化数据，可以使用命名卷
+  pvm_mirror_data:
+  pvm_mirror_logs:

@@ -1,0 +1,122 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        php-version: ['7.1', '7.2', '7.3', '7.4', '8.0', '8.1', '8.2', '8.3']
+    
+    name: PHP ${{ matrix.php-version }} Test
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-version }}
+        extensions: mbstring, curl, json, zip
+        coverage: xdebug
+    
+    - name: Validate composer.json and composer.lock
+      run: composer validate --strict
+    
+    - name: Cache Composer packages
+      id: composer-cache
+      uses: actions/cache@v3
+      with:
+        path: vendor
+        key: ${{ runner.os }}-php-${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-${{ matrix.php-version }}-
+    
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest
+    
+    - name: Run syntax check
+      run: find src -name "*.php" -exec php -l {} \;
+    
+    - name: Run code style check
+      run: composer cs-check
+      continue-on-error: true
+    
+    - name: Run static analysis
+      run: composer phpstan
+      continue-on-error: true
+    
+    - name: Run tests
+      run: composer test
+    
+    - name: Run tests with coverage
+      if: matrix.php-version == '8.1'
+      run: composer test-coverage
+    
+    - name: Upload coverage reports to Codecov
+      if: matrix.php-version == '8.1'
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+
+  security:
+    runs-on: ubuntu-latest
+    name: Security Check
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        extensions: mbstring, curl, json, zip
+    
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest
+    
+    - name: Run security check
+      run: |
+        composer audit
+      continue-on-error: true
+
+  basic-functionality:
+    runs-on: ubuntu-latest
+    name: Basic Functionality Test
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        extensions: mbstring, curl, json, zip
+    
+    - name: Test basic commands
+      run: |
+        php bin/pvm-mirror help
+        php bin/pvm-mirror status
+    
+    - name: Test configuration loading
+      run: |
+        php -r "
+        define('ROOT_DIR', __DIR__);
+        require 'src/Autoloader.php';
+        Autoloader::register();
+        try {
+          \$config = new Mirror\Config\ConfigManager();
+          echo 'Configuration loaded successfully' . PHP_EOL;
+        } catch (Exception \$e) {
+          echo 'Configuration error: ' . \$e->getMessage() . PHP_EOL;
+          exit(1);
+        }
+        "

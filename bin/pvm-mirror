@@ -1,0 +1,60 @@
+#!/usr/bin/env php
+<?php
+
+/**
+ * PVM 镜像应用
+ * pvm-mirror
+ *
+ * 用于镜像 PVM 项目涉及的所有需要下载的内容
+ */
+
+// 定义根目录
+define('ROOT_DIR', dirname(__DIR__));
+
+// 尝试使用Composer自动加载器，如果不存在则使用内置自动加载器
+if (file_exists(ROOT_DIR . '/vendor/autoload.php')) {
+    require ROOT_DIR . '/vendor/autoload.php';
+} else {
+    // 包含内置自动加载器
+    require ROOT_DIR . '/src/Autoloader.php';
+    // 注册自动加载器
+    Autoloader::register();
+}
+
+try {
+    // 解析日志级别
+    $logLevel = \Mirror\Log\Logger::parseLogLevel($argv);
+
+    // 设置日志级别
+    \Mirror\Log\Logger::setLevel($logLevel);
+
+    // 初始化PVM风格的文件日志系统
+    $command = isset($argv[1]) ? $argv[1] : 'help';
+    $commandArgs = array_slice($argv, 2);
+
+    // 清理日志级别参数
+    $commandArgs = \Mirror\Log\Logger::cleanLogLevelArgs($commandArgs);
+
+    \Mirror\Log\LogManager::initPvmLogging($command, $commandArgs);
+
+    // 创建应用程序
+    $application = new Mirror\Application();
+
+    // 运行应用程序
+    $exitCode = $application->run($argv);
+
+    // 记录命令结束
+    \Mirror\Log\LogManager::logCommandEnd($exitCode);
+
+    // 退出
+    exit($exitCode);
+} catch (Exception $e) {
+    echo "\033[31m错误: " . $e->getMessage() . "\033[0m" . PHP_EOL;
+
+    // 记录异常到日志
+    \Mirror\Log\LogManager::pvmError("未捕获的异常: " . $e->getMessage());
+    \Mirror\Log\LogManager::pvmError("异常堆栈: " . $e->getTraceAsString());
+    \Mirror\Log\LogManager::logCommandEnd(1);
+
+    exit(1);
+}
