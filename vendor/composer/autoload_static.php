@@ -38,6 +38,7 @@ class ComposerStaticInit90d320c8d639c13bc9068d76296fe7fa
         'b6b991a57620e2fb6b2f66f03fe9ddc2' => __DIR__ . '/..' . '/symfony/string/Resources/functions.php',
         '044fc72df35e84c745ee0d4120dc15d2' => __DIR__ . '/..' . '/dcat/laravel-admin/src/Support/helpers.php',
         'a1cfe24d14977df6878b9bf804af2d1c' => __DIR__ . '/..' . '/nunomaduro/collision/src/Adapters/Phpunit/Autoload.php',
+        'b4e3f29b106af37a2bb239f73cdf68c7' => __DIR__ . '/../..' . '/app/helpers.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -571,8 +572,12 @@ class ComposerStaticInit90d320c8d639c13bc9068d76296fe7fa
     );
 
     public static $classMap = array (
+        'App\\Admin\\Controllers\\AccessLogController' => __DIR__ . '/../..' . '/app/Admin/Controllers/AccessLogController.php',
         'App\\Admin\\Controllers\\AuthController' => __DIR__ . '/../..' . '/app/Admin/Controllers/AuthController.php',
         'App\\Admin\\Controllers\\HomeController' => __DIR__ . '/../..' . '/app/Admin/Controllers/HomeController.php',
+        'App\\Admin\\Controllers\\MirrorController' => __DIR__ . '/../..' . '/app/Admin/Controllers/MirrorController.php',
+        'App\\Admin\\Controllers\\SyncJobController' => __DIR__ . '/../..' . '/app/Admin/Controllers/SyncJobController.php',
+        'App\\Admin\\Controllers\\SystemConfigController' => __DIR__ . '/../..' . '/app/Admin/Controllers/SystemConfigController.php',
         'App\\Admin\\Metrics\\Examples\\NewDevices' => __DIR__ . '/../..' . '/app/Admin/Metrics/Examples/NewDevices.php',
         'App\\Admin\\Metrics\\Examples\\NewUsers' => __DIR__ . '/../..' . '/app/Admin/Metrics/Examples/NewUsers.php',
         'App\\Admin\\Metrics\\Examples\\ProductOrders' => __DIR__ . '/../..' . '/app/Admin/Metrics/Examples/ProductOrders.php',
@@ -585,8 +590,12 @@ class ComposerStaticInit90d320c8d639c13bc9068d76296fe7fa
         'App\\Console\\Commands\\SyncCommand' => __DIR__ . '/../..' . '/app/Console/Commands/SyncCommand.php',
         'App\\Console\\Kernel' => __DIR__ . '/../..' . '/app/Console/Kernel.php',
         'App\\Exceptions\\Handler' => __DIR__ . '/../..' . '/app/Exceptions/Handler.php',
-        'App\\Http\\Controllers\\Admin\\DashboardController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/DashboardController.php',
+        'App\\Helpers\\FormatHelper' => __DIR__ . '/../..' . '/app/Helpers/FormatHelper.php',
         'App\\Http\\Controllers\\Api\\ApiController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/ApiController.php',
+        'App\\Http\\Controllers\\Api\\ComposerController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/ComposerController.php',
+        'App\\Http\\Controllers\\Api\\PeclController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/PeclController.php',
+        'App\\Http\\Controllers\\Api\\PhpController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/PhpController.php',
+        'App\\Http\\Controllers\\Api\\StatusController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/StatusController.php',
         'App\\Http\\Controllers\\Api\\V1\\MirrorController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/V1/MirrorController.php',
         'App\\Http\\Controllers\\Api\\V1\\SyncJobController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/V1/SyncJobController.php',
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',

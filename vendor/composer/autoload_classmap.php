@@ -6,8 +6,12 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'App\\Admin\\Controllers\\AccessLogController' => $baseDir . '/app/Admin/Controllers/AccessLogController.php',
     'App\\Admin\\Controllers\\AuthController' => $baseDir . '/app/Admin/Controllers/AuthController.php',
     'App\\Admin\\Controllers\\HomeController' => $baseDir . '/app/Admin/Controllers/HomeController.php',
+    'App\\Admin\\Controllers\\MirrorController' => $baseDir . '/app/Admin/Controllers/MirrorController.php',
+    'App\\Admin\\Controllers\\SyncJobController' => $baseDir . '/app/Admin/Controllers/SyncJobController.php',
+    'App\\Admin\\Controllers\\SystemConfigController' => $baseDir . '/app/Admin/Controllers/SystemConfigController.php',
     'App\\Admin\\Metrics\\Examples\\NewDevices' => $baseDir . '/app/Admin/Metrics/Examples/NewDevices.php',
     'App\\Admin\\Metrics\\Examples\\NewUsers' => $baseDir . '/app/Admin/Metrics/Examples/NewUsers.php',
     'App\\Admin\\Metrics\\Examples\\ProductOrders' => $baseDir . '/app/Admin/Metrics/Examples/ProductOrders.php',
@@ -20,8 +24,12 @@ return array(
     'App\\Console\\Commands\\SyncCommand' => $baseDir . '/app/Console/Commands/SyncCommand.php',
     'App\\Console\\Kernel' => $baseDir . '/app/Console/Kernel.php',
     'App\\Exceptions\\Handler' => $baseDir . '/app/Exceptions/Handler.php',
-    'App\\Http\\Controllers\\Admin\\DashboardController' => $baseDir . '/app/Http/Controllers/Admin/DashboardController.php',
+    'App\\Helpers\\FormatHelper' => $baseDir . '/app/Helpers/FormatHelper.php',
     'App\\Http\\Controllers\\Api\\ApiController' => $baseDir . '/app/Http/Controllers/Api/ApiController.php',
+    'App\\Http\\Controllers\\Api\\ComposerController' => $baseDir . '/app/Http/Controllers/Api/ComposerController.php',
+    'App\\Http\\Controllers\\Api\\PeclController' => $baseDir . '/app/Http/Controllers/Api/PeclController.php',
+    'App\\Http\\Controllers\\Api\\PhpController' => $baseDir . '/app/Http/Controllers/Api/PhpController.php',
+    'App\\Http\\Controllers\\Api\\StatusController' => $baseDir . '/app/Http/Controllers/Api/StatusController.php',
     'App\\Http\\Controllers\\Api\\V1\\MirrorController' => $baseDir . '/app/Http/Controllers/Api/V1/MirrorController.php',
     'App\\Http\\Controllers\\Api\\V1\\SyncJobController' => $baseDir . '/app/Http/Controllers/Api/V1/SyncJobController.php',
     'App\\Http\\Controllers\\Controller' => $baseDir . '/app/Http/Controllers/Controller.php',

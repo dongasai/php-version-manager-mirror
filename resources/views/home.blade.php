@@ -259,17 +259,4 @@ setInterval(function() {
 </script>
 @endpush
 
-@php
-// 定义格式化字节大小的辅助函数
-function formatBytes($bytes, $precision = 2) {
-    if ($bytes == 0) return '0 B';
 
-    $units = ['B', 'KB', 'MB', 'GB', 'TB'];
-
-    for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
-        $bytes /= 1024;
-    }
-
-    return round($bytes, $precision) . ' ' . $units[$i];
-}
-@endphp
