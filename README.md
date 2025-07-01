@@ -35,10 +35,10 @@ PHP Version Manager Mirror 是一个专为 PHP 开发者设计的镜像服务，
 git clone https://github.com/dongasai/php-version-manager-mirror.git
 cd php-version-manager-mirror
 
-# 开发环境
+# 开发环境 (端口: 34003)
 docker compose -f docker-compose.dev.yml up -d
 
-# 生产环境
+# 生产环境 (端口: 80)
 docker compose -f docker-compose.prod.yml up -d
 ```
 
