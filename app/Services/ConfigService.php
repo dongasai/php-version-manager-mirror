@@ -119,7 +119,7 @@ class ConfigService
      */
     public function getDataDir(): string
     {
-        return $this->get('data_dir', storage_path('app/mirror-data'));
+        return $this->get('system.data_dir', base_path('data'));
     }
 
     /**
@@ -129,7 +129,7 @@ class ConfigService
      */
     public function getCacheDir(): string
     {
-        return $this->get('cache_dir', storage_path('app/mirror-cache'));
+        return $this->get('system.cache_dir', storage_path('app/mirror-cache'));
     }
 
     /**

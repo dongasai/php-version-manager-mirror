@@ -186,7 +186,7 @@ class SystemConfig extends Model
     {
         return [
             'system.data_dir' => [
-                'value' => storage_path('app/mirror-data'),
+                'value' => base_path('data'),
                 'description' => '镜像数据存储目录',
             ],
             'system.cache_dir' => [
