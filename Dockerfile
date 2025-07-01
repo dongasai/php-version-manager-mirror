@@ -44,6 +44,9 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # 复制应用代码
 COPY . /var/www/html
 
+# 安装 Composer 依赖
+RUN cd /var/www/html && composer install --no-dev --optimize-autoloader
+
 # 设置正确的 DocumentRoot
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
