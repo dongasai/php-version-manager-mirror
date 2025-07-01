@@ -3,17 +3,13 @@ version: '3.8'
 services:
   # Laravel 开发环境
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/dongasai/php-version-manager-mirror:latest
     container_name: pvm-mirror-laravel-dev
     restart: unless-stopped
     ports:
-      - "8080:80"
+      - "34003:80"
     volumes:
       - .:/var/www/html
-      - ./storage:/var/www/html/storage
-      - ./database:/var/www/html/database
     environment:
       - APP_ENV=local
       - APP_DEBUG=true

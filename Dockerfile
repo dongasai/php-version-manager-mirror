@@ -4,10 +4,15 @@ FROM php:8.1-apache
 # 设置工作目录
 WORKDIR /var/www/html
 
+# 使用阿里云镜像源加速
+RUN sed -i 's/deb.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list.d/debian.sources || \
+    sed -i 's/deb.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list
+
 # 安装系统依赖
 RUN apt-get update && apt-get install -y \
     git \
     curl \
+    wget \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
@@ -30,8 +35,11 @@ RUN docker-php-ext-install \
 # 启用 Apache 模块
 RUN a2enmod rewrite
 
-# 安装 Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# 手动安装 Composer (避免网络问题)
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer || \
+    wget -O composer-setup.php https://getcomposer.org/installer && \
+    php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
+    rm composer-setup.php
 
 # 复制应用代码
 COPY . /var/www/html

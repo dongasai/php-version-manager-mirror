@@ -10,7 +10,6 @@ use Dcat\Admin\Layout\Column;
 use Dcat\Admin\Layout\Content;
 use Dcat\Admin\Layout\Row;
 use Dcat\Admin\Widgets\Card;
-use Dcat\Admin\Widgets\InfoBox;
 
 class HomeController extends Controller
 {
@@ -25,56 +24,52 @@ class HomeController extends Controller
                     $mirrorCount = Mirror::count();
                     $activeMirrors = Mirror::where('status', 1)->count();
 
-                    $column->append(new InfoBox(
-                        '镜像总数',
-                        'mirror',
-                        'aqua',
-                        '/admin/mirrors',
-                        $mirrorCount . ' 个',
-                        $activeMirrors . ' 个启用'
-                    ));
+                    $column->append(new Card('镜像总数', '
+                        <div class="text-center">
+                            <h2 class="text-primary">' . $mirrorCount . ' 个</h2>
+                            <p class="text-muted">' . $activeMirrors . ' 个启用</p>
+                            <a href="/admin/mirrors" class="btn btn-sm btn-outline-primary">查看详情</a>
+                        </div>
+                    '));
                 });
 
                 $row->column(3, function (Column $column) {
                     $totalJobs = SyncJob::count();
                     $runningJobs = SyncJob::where('status', 'running')->count();
 
-                    $column->append(new InfoBox(
-                        '同步任务',
-                        'tasks',
-                        'green',
-                        '/admin/sync-jobs',
-                        $totalJobs . ' 个',
-                        $runningJobs . ' 个运行中'
-                    ));
+                    $column->append(new Card('同步任务', '
+                        <div class="text-center">
+                            <h2 class="text-success">' . $totalJobs . ' 个</h2>
+                            <p class="text-muted">' . $runningJobs . ' 个运行中</p>
+                            <a href="/admin/sync-jobs" class="btn btn-sm btn-outline-success">查看详情</a>
+                        </div>
+                    '));
                 });
 
                 $row->column(3, function (Column $column) {
                     $todayLogs = AccessLog::whereDate('created_at', today())->count();
                     $weekLogs = AccessLog::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count();
 
-                    $column->append(new InfoBox(
-                        '今日访问',
-                        'eye',
-                        'yellow',
-                        '/admin/access-logs',
-                        $todayLogs . ' 次',
-                        '本周 ' . $weekLogs . ' 次'
-                    ));
+                    $column->append(new Card('今日访问', '
+                        <div class="text-center">
+                            <h2 class="text-warning">' . $todayLogs . ' 次</h2>
+                            <p class="text-muted">本周 ' . $weekLogs . ' 次</p>
+                            <a href="/admin/access-logs" class="btn btn-sm btn-outline-warning">查看详情</a>
+                        </div>
+                    '));
                 });
 
                 $row->column(3, function (Column $column) {
                     $completedJobs = SyncJob::where('status', 'completed')->count();
                     $failedJobs = SyncJob::where('status', 'failed')->count();
 
-                    $column->append(new InfoBox(
-                        '已完成任务',
-                        'check',
-                        'red',
-                        '/admin/sync-jobs',
-                        $completedJobs . ' 个',
-                        $failedJobs . ' 个失败'
-                    ));
+                    $column->append(new Card('已完成任务', '
+                        <div class="text-center">
+                            <h2 class="text-info">' . $completedJobs . ' 个</h2>
+                            <p class="text-muted">' . $failedJobs . ' 个失败</p>
+                            <a href="/admin/sync-jobs" class="btn btn-sm btn-outline-info">查看详情</a>
+                        </div>
+                    '));
                 });
 
                 // 最近任务和系统信息

@@ -1,38 +1,55 @@
 <?php
 
-/**
- * PVM 镜像 Web 服务
- *
- * 提供 Web 界面和文件下载服务
- */
+use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Http\Request;
 
-// 开启错误显示
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+define('LARAVEL_START', microtime(true));
 
-// 定义根目录
-define('ROOT_DIR', dirname(__DIR__));
+/*
+|--------------------------------------------------------------------------
+| Check If The Application Is Under Maintenance
+|--------------------------------------------------------------------------
+|
+| If the application is in maintenance / demo mode via the "down" command
+| we will load this file so that any pre-rendered content can be shown
+| instead of starting the framework, which could cause an exception.
+|
+*/
 
-// 包含自动加载器
-require ROOT_DIR . '/srcMirror/Autoloader.php';
-
-// 注册自动加载器
-Autoloader::register();
-
-try {
-    // 创建控制器
-    $controller = new Mirror\Web\Controller();
-
-    // 获取请求路径
-    $requestPath = $_SERVER['REQUEST_URI'];
-
-    // 处理请求
-    $controller->handleRequest($requestPath);
-} catch (Exception $e) {
-    // 显示错误信息
-    echo '<h1>Error</h1>';
-    echo '<p>' . $e->getMessage() . '</p>';
-    echo '<h2>Stack Trace</h2>';
-    echo '<pre>' . $e->getTraceAsString() . '</pre>';
+if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
+    require $maintenance;
 }
+
+/*
+|--------------------------------------------------------------------------
+| Register The Auto Loader
+|--------------------------------------------------------------------------
+|
+| Composer provides a convenient, automatically generated class loader for
+| this application. We just need to utilize it! We'll simply require it
+| into the script here so we don't need to manually load our classes.
+|
+*/
+
+require __DIR__.'/../vendor/autoload.php';
+
+/*
+|--------------------------------------------------------------------------
+| Run The Application
+|--------------------------------------------------------------------------
+|
+| Once we have the application, we can handle the incoming request using
+| the application's HTTP kernel. Then, we will send the response back
+| to this client's browser, allowing them to enjoy our application.
+|
+*/
+
+$app = require_once __DIR__.'/../bootstrap/app.php';
+
+$kernel = $app->make(Kernel::class);
+
+$response = $kernel->handle(
+    $request = Request::capture()
+)->send();
+
+$kernel->terminate($request, $response);

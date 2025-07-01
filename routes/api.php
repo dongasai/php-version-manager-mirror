@@ -14,7 +14,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-use App\Http\Controllers\Api\ApiController;
+use App\Http\Controllers\Api\StatusController;
+use App\Http\Controllers\Api\PhpController;
+use App\Http\Controllers\Api\PeclController;
+use App\Http\Controllers\Api\ComposerController;
 use App\Http\Controllers\Api\V1\MirrorController;
 use App\Http\Controllers\Api\V1\SyncJobController;
 
@@ -31,7 +34,7 @@ Route::prefix('v1')->name('v1.')->group(function () {
     Route::get('sync-jobs-stats', [SyncJobController::class, 'stats'])->name('sync-jobs.stats');
 
     // 系统状态
-    Route::get('status', [ApiController::class, 'status'])->name('status');
+    Route::get('status', [StatusController::class, 'index'])->name('status');
     Route::get('ping', function () {
         return response()->json([
             'success' => true,
@@ -42,12 +45,15 @@ Route::prefix('v1')->name('v1.')->group(function () {
     })->name('ping');
 });
 
-// 兼容旧版API (无版本前缀)
-Route::get('status', [ApiController::class, 'status']);
-Route::get('php', [ApiController::class, 'php']);
-Route::get('pecl', [ApiController::class, 'pecl']);
-Route::get('extensions', [ApiController::class, 'extensions']);
-Route::get('composer', [ApiController::class, 'composer']);
+// 核心API接口 (无版本前缀，保持向后兼容)
+Route::get('status', [StatusController::class, 'index'])->name('status');
+Route::get('php/version/{major_version}', [PhpController::class, 'versions'])->name('php.versions');
+Route::get('php/pecl/{major_version}', [PhpController::class, 'peclExtensions'])->name('php.pecl');
+Route::get('pecl/{extension_name}', [PeclController::class, 'versions'])->name('pecl.versions');
+Route::get('pecl/{extension_name}/info', [PeclController::class, 'show'])->name('pecl.info');
+Route::get('composer', [ComposerController::class, 'versions'])->name('composer.versions');
+Route::get('composer/latest', [ComposerController::class, 'latest'])->name('composer.latest');
+Route::get('composer/installer', [ComposerController::class, 'installer'])->name('composer.installer');
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

@@ -1,175 +1,113 @@
 # PHP Version Manager Mirror
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![PHP Version](https://img.shields.io/badge/PHP-7.1%2B-blue.svg)](https://php.net)
-[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://docker.com)
+[![Build Status](https://github.com/dongasai/php-version-manager-mirror/workflows/Build%20and%20Push%20Docker%20Image/badge.svg)](https://github.com/dongasai/php-version-manager-mirror/actions)
+[![Docker Image](https://img.shields.io/badge/docker-ghcr.io-blue)](https://github.com/dongasai/php-version-manager-mirror/pkgs/container/php-version-manager-mirror)
+[![License](https://img.shields.io/github/license/dongasai/php-version-manager-mirror)](LICENSE)
 
-PHP Version Manager Mirror Service - 独立的PHP版本管理镜像服务，为PVM项目提供高速、稳定的下载镜像源。
+基于 Laravel 10 + Dcat Admin 2.0 重构的 PHP 版本管理器镜像服务。
 
-## 🚀 功能特性
+## 项目简介
 
-- **多源镜像**: 支持PHP源码、PECL扩展、Composer等多种资源镜像
-- **智能同步**: 自动从官方源同步最新版本，支持增量更新
-- **高性能**: 内置缓存机制，支持并发下载和断点续传
-- **Docker支持**: 提供完整的Docker容器化解决方案
-- **Admin界面**: 直观的Admin管理界面，支持状态监控和配置管理
-- **API接口**: RESTful API接口，供PVM获取数据用
+PHP Version Manager Mirror 是一个专为 PHP 开发者设计的镜像服务，提供：
 
-## 📦 快速开始
+- **PHP 源码镜像** - 提供各版本 PHP 源码下载
+- **PECL 扩展镜像** - 提供 PHP 扩展包下载
+- **Composer 镜像** - 提供 Composer 包管理器下载
+- **Web 管理界面** - 基于 Dcat Admin 的现代化管理后台
+- **RESTful API** - 完整的 API 接口支持
+- **容器化部署** - 基于 Docker 的一键部署
 
-### 使用Docker（推荐）
+## 技术栈
+
+- **后端框架**: Laravel 10.x
+- **管理后台**: Dcat Admin 2.0
+- **数据库**: SQLite / MySQL 8.0+
+- **缓存**: Redis (可选)
+- **容器**: Docker + php-apache
+- **CI/CD**: GitHub Actions
+
+## 快速开始
+
+### 使用 Docker 部署
 
 ```bash
 # 克隆项目
-git clone https://github.com/pvm-project/php-version-manager-mirror.git
+git clone https://github.com/dongasai/php-version-manager-mirror.git
 cd php-version-manager-mirror
 
-# 启动开发环境
-cd docker
-docker compose -f dev-compose.yml up -d
+# 开发环境
+docker compose -f docker-compose.dev.yml up -d
 
-# 访问Web界面
-open http://localhost:34403
+# 生产环境
+docker compose -f docker-compose.prod.yml up -d
 ```
 
-### 本地安装
+### 本地开发
 
 ```bash
-# 克隆项目
-git clone https://github.com/pvm-project/php-version-manager-mirror.git
-cd php-version-manager-mirror
-
-# 安装依赖（可选）
+# 安装依赖
 composer install
 
-# 启动镜像服务
-./bin/pvm-mirror server start
-
-# 访问Web界面
-open http://localhost:34403
-```
-
-## 🛠️ 命令行工具
-
-```bash
-# 查看状态
-./bin/pvm-mirror status
-
-# 同步镜像内容
-./bin/pvm-mirror sync
-
-# 启动服务器
-./bin/pvm-mirror server start
-
-# 停止服务器
-./bin/pvm-mirror server stop
-
-# 查看帮助
-./bin/pvm-mirror help
-```
-
-## 🐳 Docker部署
-
-### 开发环境
-
-```bash
-cd docker
-docker compose -f dev-compose.yml up -d
-```
-
-### 生产环境
-
-```bash
-cd docker
+# 配置环境
 cp .env.example .env
-# 编辑.env文件设置生产环境配置
-docker compose -f prod-compose.yml up -d
+php artisan key:generate
+
+# 数据库迁移
+php artisan migrate
+
+# 安装 Dcat Admin
+php artisan admin:install
+
+# 启动服务
+php artisan serve
 ```
 
-## 📖 配置说明
+## 访问地址
 
-主要配置文件位于 `config/` 目录：
+- **前端界面**: http://localhost:8080
+- **管理后台**: http://localhost:8080/admin
+- **API 文档**: http://localhost:8080/docs
 
-- `runtime.php` - 运行时配置（服务器、缓存、日志等）
-- `mirror.php` - 镜像内容配置（同步源、版本等）
-- `extensions/` - 扩展配置目录
+## 主要功能
 
-### 环境变量配置
+### 镜像服务
+- PHP 源码版本管理和下载
+- PECL 扩展包管理和下载
+- Composer 版本管理和下载
+- 自动同步和缓存机制
 
-| 变量名 | 默认值 | 说明 |
-|--------|--------|------|
-| `PVM_MIRROR_PORT` | `34403` | 服务端口 |
-| `PVM_MIRROR_HOST` | `0.0.0.0` | 监听地址 |
-| `PVM_MIRROR_DATA_DIR` | `./data` | 数据目录 |
-| `PVM_MIRROR_LOG_DIR` | `./logs` | 日志目录 |
-| `PVM_MIRROR_CACHE_DIR` | `./cache` | 缓存目录 |
+### 管理功能
+- 系统状态监控
+- 镜像配置管理
+- 同步任务管理
+- 访问日志查看
+- 系统配置管理
 
-## 🔧 开发指南
+### API 接口
+- 系统状态查询
+- PHP 版本列表
+- PECL 扩展查询
+- Composer 版本查询
 
-### 环境要求
-
-- PHP 7.1+
-- Composer（可选）
-- Docker（可选）
-
-### 开发环境搭建
-
-```bash
-# 克隆项目
-git clone https://github.com/pvm-project/php-version-manager-mirror.git
-cd php-version-manager-mirror
-
-# 安装开发依赖
-composer install --dev
-
-# 运行测试
-composer test
-
-# 代码风格检查
-composer cs-check
-
-# 静态分析
-composer phpstan
-```
-
-### 项目结构
+## 项目结构
 
 ```
-php-version-manager-mirror/
-├── src/                    # 核心代码
-├── config/                 # 配置文件
-├── docker/                 # Docker配置
-├── bin/                    # 可执行文件
-├── docs/                   # 项目文档
-├── tests/                  # 测试文件
-├── data/                   # 数据目录
-├── logs/                   # 日志目录
-├── cache/                  # 缓存目录
-└── public/                 # Web界面
+├── app/                    # Laravel 应用代码
+│   ├── Admin/             # Dcat Admin 控制器
+│   ├── Console/Commands/  # Artisan 命令
+│   ├── Http/Controllers/  # Web 控制器
+│   ├── Models/           # 数据模型
+│   └── Services/         # 业务服务
+├── database/             # 数据库文件
+├── docker/              # Docker 配置
+├── old/                 # 原版本代码
+└── resources/           # 前端资源
 ```
 
-## 📚 API文档
+## 贡献指南
 
-详细的API文档请参考：[API Documentation](docs/api.md)
+欢迎提交 Issue 和 Pull Request 来帮助改进项目。
 
-## 🤝 贡献指南
+## 许可证
 
-欢迎贡献代码！请参考：[Contributing Guide](docs/contributing.md)
-
-## 📄 许可证
-
-本项目采用 MIT 许可证。详情请参考 [LICENSE](LICENSE) 文件。
-
-## 🔗 相关链接
-
-- [PVM主项目](https://github.com/pvm-project/pvm)
-- [问题反馈](https://github.com/pvm-project/php-version-manager-mirror/issues)
-- [更新日志](CHANGELOG.md)
-
-## 💬 支持
-
-如果您在使用过程中遇到问题，可以通过以下方式获取帮助：
-
-- [GitHub Issues](https://github.com/pvm-project/php-version-manager-mirror/issues)
-- [讨论区](https://github.com/pvm-project/php-version-manager-mirror/discussions)
-- 邮件：support@pvm-project.org
+本项目基于 [MIT License](LICENSE) 开源。

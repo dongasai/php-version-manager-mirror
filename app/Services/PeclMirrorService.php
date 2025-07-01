@@ -66,7 +66,8 @@ class PeclMirrorService
         $totalExtensions = count($extensions);
 
         foreach ($extensions as $index => $extension) {
-            $this->updateJobLog($syncJob, "同步PECL扩展: {$extension['name']} ({$index + 1}/{$totalExtensions})");
+            $current = $index + 1;
+            $this->updateJobLog($syncJob, "同步PECL扩展: {$extension['name']} ({$current}/{$totalExtensions})");
 
             if ($this->syncExtension($syncJob, $extension, $dataDir)) {
                 $successCount++;

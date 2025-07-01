@@ -207,7 +207,8 @@ class PhpMirrorService
         $successCount = 0;
 
         foreach ($needsDownload as $index => $item) {
-            $this->updateJobLog($syncJob, "下载 PHP {$item['version']} ({$index + 1}/{$totalItems})");
+            $current = $index + 1;
+            $this->updateJobLog($syncJob, "下载 PHP {$item['version']} ({$current}/{$totalItems})");
 
             if ($this->downloadPhpVersion($syncJob, $item)) {
                 $successCount++;

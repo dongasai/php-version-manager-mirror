@@ -1,0 +1,58 @@
+# Composer
+/vendor/
+composer.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+/logs/*.log
+/logs/**/*.log
+*.log
+
+# Data
+/data/*
+!/data/.gitkeep
+
+# Cache
+/cache/*
+!/cache/.gitkeep
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build
+/build/
+/dist/
+
+# Coverage
+/coverage/
+/coverage.xml
+/.phpunit.result.cache
+
+# Docker
+docker-compose.override.yml
+
+# Temporary files
+*.tmp
+*.temp
+/tmp/
+
+# Runtime
+*.pid
+*.sock
+
+# Backup files
+*.bak
+*.backup
+*~
