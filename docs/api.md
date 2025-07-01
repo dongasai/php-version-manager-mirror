@@ -1,13 +1,22 @@
 # API 文档
 
-PHP Version Manager Mirror 提供了完整的 RESTful API 接口，支持程序化访问和集成。
+PHP Version Manager Mirror 提供了 RESTful API 接口，供'PHP Version Manager'获取数据用
 
-## 基础信息
+
+## 接口列表
+1. 系统状态 ,'api/status'
+2. 可用PHP版本列表,'api/php/version/{PHP大版本,例如7.1}'
+3. 可用PECL扩展列表,,'api/php/pecl/{PHP大版本,例如7.1}'
+3.1 PECL扩展版本列表,'api/pecl/{PECL扩展名称,例如redis}' 
+4. 可用Composer版本列表, 'api/composer'
+5. 可用源码扩展列表, 'api/extensions/{扩展名称,例如swoole}'
+
+
+## 础信息
 
 - **Base URL**: `http://localhost:34403/api`
 - **API Version**: v1
 - **Content-Type**: `application/json`
-- **Authentication**: 暂不需要（未来版本可能添加）
 
 ## 通用响应格式
 
