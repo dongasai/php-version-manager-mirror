@@ -25,6 +25,11 @@ use Mirror\Command\UpdateConfigCommand;
 class Application
 {
     /**
+     * 应用程序版本
+     */
+    const VERSION = '1.0.0';
+
+    /**
      * 命令列表
      *
      * @var array
@@ -91,6 +96,16 @@ class Application
     public function getCommands()
     {
         return $this->commands;
+    }
+
+    /**
+     * 获取应用程序版本
+     *
+     * @return string
+     */
+    public function getVersion()
+    {
+        return self::VERSION;
     }
 
     /**

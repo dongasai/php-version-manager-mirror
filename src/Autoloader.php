@@ -22,8 +22,15 @@ class Autoloader
             // 获取相对类名
             $relativeClass = substr($class, $len);
 
-            // 将命名空间转换为文件路径
-            $file = ROOT_DIR . '/src/' . str_replace('\\', '/', $relativeClass) . '.php';
+            // 检查是否是测试类
+            if (strpos($relativeClass, 'Tests\\') === 0) {
+                // 测试类在tests目录
+                $testClass = substr($relativeClass, 6); // 移除'Tests\'
+                $file = ROOT_DIR . '/tests/' . str_replace('\\', '/', $testClass) . '.php';
+            } else {
+                // 普通类在src目录
+                $file = ROOT_DIR . '/src/' . str_replace('\\', '/', $relativeClass) . '.php';
+            }
 
             // 如果文件存在，则包含它
             if (file_exists($file)) {
