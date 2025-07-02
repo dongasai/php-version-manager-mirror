@@ -6,6 +6,7 @@ use App\Models\Mirror;
 use App\Models\SyncJob;
 use App\Services\MirrorService;
 use App\Services\ConfigService;
+use App\Services\MirrorConfigService;
 use Illuminate\Console\Command;
 
 class StatusCommand extends Command
@@ -42,12 +43,20 @@ class StatusCommand extends Command
     protected $configService;
 
     /**
+     * 镜像配置服务
+     *
+     * @var MirrorConfigService
+     */
+    protected $mirrorConfigService;
+
+    /**
      * 构造函数
      *
      * @param MirrorService $mirrorService
      * @param ConfigService $configService
+     * @param MirrorConfigService $mirrorConfigService
      */
-    public function __construct(MirrorService $mirrorService, ConfigService $configService)
+    public function __construct(MirrorService $mirrorService, ConfigService $configService, MirrorConfigService $mirrorConfigService)
     {
         parent::__construct();
         $this->mirrorService = $mirrorService;

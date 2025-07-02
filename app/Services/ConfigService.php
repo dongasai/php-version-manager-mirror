@@ -24,6 +24,150 @@ class ConfigService
     const CACHE_TTL = 3600;
 
     /**
+     * 获取镜像配置
+     *
+     * @param string|null $key 配置键，为null时返回所有配置
+     * @param mixed $default 默认值
+     * @return mixed
+     */
+    public function getMirrorConfig(string $key = null, $default = null)
+    {
+        $config = config('mirror');
+
+        if ($key === null) {
+            return $config;
+        }
+
+        return data_get($config, $key, $default);
+    }
+
+    /**
+     * 获取PHP版本配置（按旧系统格式）
+     *
+     * @param string|null $majorVersion 主版本号，为null时返回所有版本
+     * @return array
+     */
+    public function getPhpVersions(string $majorVersion = null): array
+    {
+        if ($majorVersion === null) {
+            // 返回所有主版本的配置
+            $allVersions = [];
+            $majorVersions = ['5.4', '5.5', '5.6', '7.0', '7.1', '7.2', '7.3', '7.4', '8.0', '8.1', '8.2', '8.3', '8.4'];
+
+            foreach ($majorVersions as $major) {
+                $configPath = config_path("extensions/php/{$major}/versions.php");
+                if (file_exists($configPath)) {
+                    $config = require $configPath;
+                    $allVersions[$major] = $config;
+                }
+            }
+
+            return $allVersions;
+        }
+
+        // 返回指定主版本的配置
+        $configPath = config_path("extensions/php/{$majorVersion}/versions.php");
+        if (file_exists($configPath)) {
+            return require $configPath;
+        }
+
+        return [];
+    }
+
+    /**
+     * 获取所有PHP版本列表
+     *
+     * @return array
+     */
+    public function getAllPhpVersions(): array
+    {
+        $allVersions = [];
+        $versionConfigs = $this->getPhpVersions();
+
+        foreach ($versionConfigs as $config) {
+            if (isset($config['versions'])) {
+                $allVersions = array_merge($allVersions, $config['versions']);
+            }
+        }
+
+        return array_unique($allVersions);
+    }
+
+    /**
+     * 获取Composer版本配置
+     *
+     * @return array
+     */
+    public function getComposerVersions(): array
+    {
+        return config('mirror.composer.versions', []);
+    }
+
+    /**
+     * 获取PECL扩展配置（按旧系统格式）
+     *
+     * @param string|null $extension 扩展名，为null时返回支持的扩展列表
+     * @return array
+     */
+    public function getPeclConfig(string $extension = null): array
+    {
+        if ($extension === null) {
+            return $this->getMirrorConfig('pecl.extensions', []);
+        }
+
+        $configPath = config_path("extensions/pecl/{$extension}.php");
+        if (file_exists($configPath)) {
+            return require $configPath;
+        }
+
+        return [];
+    }
+
+    /**
+     * 获取PECL扩展版本列表
+     *
+     * @param string $extension 扩展名
+     * @return array
+     */
+    public function getPeclExtensionVersions(string $extension): array
+    {
+        $config = $this->getPeclConfig($extension);
+        return $config['all_versions'] ?? [];
+    }
+
+    /**
+     * 获取GitHub扩展配置（按旧系统格式）
+     *
+     * @param string|null $extension 扩展名，为null时返回支持的扩展列表
+     * @return array
+     */
+    public function getGithubExtensionConfig(string $extension = null): array
+    {
+        if ($extension === null) {
+            return $this->getMirrorConfig('extensions.extensions', []);
+        }
+
+        $configPath = config_path("extensions/github/{$extension}.php");
+        if (file_exists($configPath)) {
+            return require $configPath;
+        }
+
+        return [];
+    }
+
+    /**
+     * 获取GitHub扩展版本列表
+     *
+     * @param string $extension 扩展名
+     * @return array
+     */
+    public function getGithubExtensionVersions(string $extension): array
+    {
+        $config = $this->getGithubExtensionConfig($extension);
+        return $config['all_versions'] ?? [];
+    }
+
+    /**
      * 获取配置值
      *
      * @param string $key 配置键
@@ -217,32 +361,7 @@ class ConfigService
         ]);
     }
 
-    /**
-     * 获取PECL配置
-     *
-     * @return array
-     */
-    public function getPeclConfig(): array
-    {
-        return $this->get('pecl', [
-            'enabled' => true,
-            'source' => 'https://pecl.php.net/',
-            'extensions' => [],
-        ]);
-    }
 
-    /**
-     * 获取扩展配置
-     *
-     * @return array
-     */
-    public function getExtensionConfig(): array
-    {
-        return $this->get('extension', [
-            'enabled' => true,
-            'github_extensions' => [],
-        ]);
-    }
 
     /**
      * 获取所有配置
