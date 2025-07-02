@@ -11,8 +11,9 @@ use Illuminate\Support\Facades\Http;
 
 /**
  * 镜像服务
- * 
+ *
  * 负责管理镜像源，处理文件下载和同步
+ * 使用硬编码配置而不是数据库配置
  */
 class MirrorService
 {
@@ -31,38 +32,99 @@ class MirrorService
     protected $cacheService;
 
     /**
+     * 镜像配置服务
+     *
+     * @var MirrorConfigService
+     */
+    protected $mirrorConfigService;
+
+    /**
      * 构造函数
      *
      * @param ConfigService $configService
      * @param CacheService $cacheService
+     * @param MirrorConfigService $mirrorConfigService
      */
-    public function __construct(ConfigService $configService, CacheService $cacheService)
+    public function __construct(ConfigService $configService, CacheService $cacheService, MirrorConfigService $mirrorConfigService)
     {
         $this->configService = $configService;
         $this->cacheService = $cacheService;
+        $this->mirrorConfigService = $mirrorConfigService;
     }
 
     /**
-     * 获取所有镜像
+     * 获取所有启用的镜像配置
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return array
      */
     public function getAllMirrors()
     {
-        return Mirror::where('status', 1)->get();
+        $mirrors = [];
+        $enabledTypes = $this->mirrorConfigService->getEnabledMirrorTypes();
+
+        foreach ($enabledTypes as $type) {
+            $mirrors[] = $this->getMirrorConfigByType($type);
+        }
+
+        return $mirrors;
     }
 
     /**
-     * 根据类型获取镜像
+     * 根据类型获取镜像配置
      *
      * @param string $type 镜像类型
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return array
      */
     public function getMirrorsByType(string $type)
     {
-        return Mirror::where('type', $type)
-                    ->where('status', 1)
-                    ->get();
+        $config = $this->getMirrorConfigByType($type);
+        return $config ? [$config] : [];
+    }
+
+    /**
+     * 根据类型获取单个镜像配置
+     *
+     * @param string $type 镜像类型
+     * @return array|null
+     */
+    protected function getMirrorConfigByType(string $type): ?array
+    {
+        switch ($type) {
+            case 'php':
+                $config = $this->mirrorConfigService->getPhpConfig();
+                return $config['enabled'] ? [
+                    'type' => 'php',
+                    'name' => 'PHP源码镜像',
+                    'config' => $config,
+                ] : null;
+
+            case 'pecl':
+                $config = $this->mirrorConfigService->getPeclConfig();
+                return $config['enabled'] ? [
+                    'type' => 'pecl',
+                    'name' => 'PECL扩展镜像',
+                    'config' => $config,
+                ] : null;
+
+            case 'github':
+                $config = $this->mirrorConfigService->getGithubConfig();
+                return $config['enabled'] ? [
+                    'type' => 'github',
+                    'name' => 'GitHub扩展镜像',
+                    'config' => $config,
+                ] : null;
+
+            case 'composer':
+                $config = $this->mirrorConfigService->getComposerConfig();
+                return $config['enabled'] ? [
+                    'type' => 'composer',
+                    'name' => 'Composer镜像',
+                    'config' => $config,
+                ] : null;
+
+            default:
+                return null;
+        }
     }
 
     /**
@@ -138,25 +200,23 @@ class MirrorService
     }
 
     /**
-     * 同步镜像
+     * 同步指定类型的镜像
      *
-     * @param int $mirrorId 镜像ID
+     * @param string $type 镜像类型
      * @param bool $force 是否强制同步
      * @return SyncJob
      */
-    public function syncMirror(int $mirrorId, bool $force = false): SyncJob
+    public function syncMirrorByType(string $type, bool $force = false): SyncJob
     {
-        $mirror = Mirror::findOrFail($mirrorId);
-
         // 检查是否已有正在进行的同步任务
         if (!$force) {
-            $existingJob = SyncJob::where('mirror_id', $mirrorId)
+            $existingJob = SyncJob::where('mirror_type', $type)
                                  ->whereIn('status', ['pending', 'running'])
                                  ->first();
 
             if ($existingJob) {
                 Log::warning("镜像同步任务已存在", [
-                    'mirror_id' => $mirrorId,
+                    'mirror_type' => $type,
                     'job_id' => $existingJob->id
                 ]);
                 return $existingJob;
@@ -165,7 +225,7 @@ class MirrorService
 
         // 创建同步任务
         $syncJob = SyncJob::create([
-            'mirror_id' => $mirrorId,
+            'mirror_type' => $type,
             'status' => 'pending',
             'progress' => 0,
             'log' => '',
@@ -175,7 +235,7 @@ class MirrorService
         SyncMirrorJob::dispatch($syncJob);
 
         Log::info("镜像同步任务已创建", [
-            'mirror_id' => $mirrorId,
+            'mirror_type' => $type,
             'job_id' => $syncJob->id
         ]);
 
@@ -183,23 +243,23 @@ class MirrorService
     }
 
     /**
-     * 同步所有镜像
+     * 同步所有启用的镜像
      *
      * @param bool $force 是否强制同步
      * @return array
      */
     public function syncAllMirrors(bool $force = false): array
     {
-        $mirrors = $this->getAllMirrors();
+        $enabledTypes = $this->mirrorConfigService->getEnabledMirrorTypes();
         $jobs = [];
 
-        foreach ($mirrors as $mirror) {
+        foreach ($enabledTypes as $type) {
             try {
-                $job = $this->syncMirror($mirror->id, $force);
+                $job = $this->syncMirrorByType($type, $force);
                 $jobs[] = $job;
             } catch (\Exception $e) {
                 Log::error("镜像同步失败", [
-                    'mirror_id' => $mirror->id,
+                    'mirror_type' => $type,
                     'error' => $e->getMessage()
                 ]);
             }

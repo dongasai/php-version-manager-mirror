@@ -69,7 +69,7 @@ class PeclMirrorService
             $current = $index + 1;
             $this->updateJobLog($syncJob, "同步PECL扩展: {$extension['name']} ({$current}/{$totalExtensions})");
 
-            if ($this->syncExtension($syncJob, $extension, $dataDir)) {
+            if ($this->syncSingleExtension($syncJob, $extension, $dataDir)) {
                 $successCount++;
             }
 
@@ -114,18 +114,18 @@ class PeclMirrorService
         $dataDir = $this->configService->getDataDir() . '/pecl';
         $this->ensureDirectoryExists($dataDir);
 
-        return $this->syncExtension($syncJob, $targetExtension, $dataDir);
+        return $this->syncSingleExtension($syncJob, $targetExtension, $dataDir);
     }
 
     /**
-     * 同步单个扩展
+     * 同步单个扩展（内部方法）
      *
      * @param SyncJob $syncJob 同步任务
      * @param array $extension 扩展配置
      * @param string $dataDir 数据目录
      * @return bool
      */
-    protected function syncExtension(SyncJob $syncJob, array $extension, string $dataDir): bool
+    protected function syncSingleExtension(SyncJob $syncJob, array $extension, string $dataDir): bool
     {
         $name = $extension['name'];
         $versions = $extension['versions'] ?? [];

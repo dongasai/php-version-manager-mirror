@@ -64,9 +64,10 @@ class ExtensionMirrorService
         $totalExtensions = count($extensions);
 
         foreach ($extensions as $index => $extension) {
-            $this->updateJobLog($syncJob, "同步GitHub扩展: {$extension['name']} ({$index + 1}/{$totalExtensions})");
+            $current = $index + 1;
+            $this->updateJobLog($syncJob, "同步GitHub扩展: {$extension['name']} ({$current}/{$totalExtensions})");
 
-            if ($this->syncExtension($syncJob, $extension, $baseDir)) {
+            if ($this->syncSingleExtension($syncJob, $extension, $baseDir)) {
                 $successCount++;
             }
 
@@ -109,18 +110,18 @@ class ExtensionMirrorService
         }
 
         $baseDir = $this->configService->getDataDir();
-        return $this->syncExtension($syncJob, $targetExtension, $baseDir);
+        return $this->syncSingleExtension($syncJob, $targetExtension, $baseDir);
     }
 
     /**
-     * 同步单个扩展
+     * 同步单个扩展（内部方法）
      *
      * @param SyncJob $syncJob 同步任务
      * @param array $extension 扩展配置
      * @param string $baseDir 基础目录
      * @return bool
      */
-    protected function syncExtension(SyncJob $syncJob, array $extension, string $baseDir): bool
+    protected function syncSingleExtension(SyncJob $syncJob, array $extension, string $baseDir): bool
     {
         $name = $extension['name'];
         $repo = $extension['repo'];

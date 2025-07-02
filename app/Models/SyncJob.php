@@ -19,6 +19,7 @@ class SyncJob extends Model
      */
     protected $fillable = [
         'mirror_id',
+        'mirror_type',
         'status',
         'progress',
         'log',
@@ -304,6 +305,18 @@ class SyncJob extends Model
     public function scopeForMirror($query, int $mirrorId)
     {
         return $query->where('mirror_id', $mirrorId);
+    }
+
+    /**
+     * 作用域：按镜像类型筛选
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param string $mirrorType
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeForMirrorType($query, string $mirrorType)
+    {
+        return $query->where('mirror_type', $mirrorType);
     }
 
 

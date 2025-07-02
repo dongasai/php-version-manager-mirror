@@ -59,7 +59,7 @@ class SyncMirrorJob implements ShouldQueue
     {
         Log::info("开始执行镜像同步任务", [
             'job_id' => $this->syncJob->id,
-            'mirror_id' => $this->syncJob->mirror_id
+            'mirror_type' => $this->syncJob->mirror_type
         ]);
 
         try {

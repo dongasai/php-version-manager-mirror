@@ -86,7 +86,7 @@ class SyncCommand extends Command
             $this->info("已创建 " . count($jobs) . " 个同步任务");
 
             foreach ($jobs as $job) {
-                $this->line("  任务 #{$job->id}: {$job->mirror->name} ({$job->mirror->type})");
+                $this->line("  任务 #{$job->id}: {$job->mirror_type} 镜像");
             }
 
             $this->info('所有同步任务已提交到队列');
@@ -113,20 +113,15 @@ class SyncCommand extends Command
         try {
             $mirrors = $this->mirrorService->getMirrorsByType($type);
 
-            if ($mirrors->isEmpty()) {
-                $this->error("未找到类型为 {$type} 的镜像配置");
+            if (empty($mirrors)) {
+                $this->error("未找到类型为 {$type} 的镜像配置或该镜像未启用");
                 return 1;
             }
 
-            $jobs = [];
-            foreach ($mirrors as $mirror) {
-                $job = $this->mirrorService->syncMirror($mirror->id, $force);
-                $jobs[] = $job;
+            $job = $this->mirrorService->syncMirrorByType($type, $force);
+            $this->line("  已创建任务 #{$job->id}: {$type} 镜像");
 
-                $this->line("  已创建任务 #{$job->id}: {$mirror->name}");
-            }
-
-            $this->info("已创建 " . count($jobs) . " 个同步任务");
+            $this->info("已创建 1 个同步任务");
             $this->info('同步任务已提交到队列');
             return 0;
 
