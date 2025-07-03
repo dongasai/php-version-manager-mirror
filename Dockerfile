@@ -32,9 +32,6 @@ RUN chown -R www-data:www-data /var/www/html \
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 
-# 设置环境变量
-ENV QUEUE_CONNECTION=database
-
 # 暴露端口
 EXPOSE 80
 

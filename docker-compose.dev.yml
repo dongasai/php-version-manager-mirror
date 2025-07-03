@@ -8,14 +8,4 @@ services:
       - "34403:80"
     volumes:
       - .:/var/www/html
-      - ./storage:/var/www/html/storage
-      - ./database:/var/www/html/database
-    environment:
-      - APP_ENV=local
-      - APP_DEBUG=true
-      - APP_KEY=base64:5XHjti/LRjG5IEFFoe3qx/5RJb8aX4lb0YuD+cdPgXg=
-      - DB_CONNECTION=sqlite
-      - DB_DATABASE=/var/www/html/database/database.sqlite
-      - CACHE_DRIVER=file
-      - SESSION_DRIVER=file
-      - QUEUE_CONNECTION=sync
+      
