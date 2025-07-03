@@ -1,7 +1,17 @@
-# 当前工作
+# 当前工作进度
 
-## 工作列表(标记状态)
+## 正在进行的任务
+暂无正在进行的任务
 
+## 最近完成的工作
+- 队列增加 job_runs 表记录运行记录 (2025-07-04 02:54)
+  - 创建 job_runs 数据库表和模型
+  - 修改队列任务集成执行记录功能
+  - 创建后台管理界面
+  - 解决容器权限问题
+  - 更新数据库文档
+
+## 待处理事项
 1. 实现系统状态API接口 (GET /api/status)
 2. 实现PHP版本列表API接口 (GET /api/php/version/{major_version})
 3. 实现PECL扩展API接口 (GET /api/php/pecl/{major_version}, GET /api/pecl/{extension_name})

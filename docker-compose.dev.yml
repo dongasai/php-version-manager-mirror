@@ -8,4 +8,7 @@ services:
       - "34403:80"
     volumes:
       - .:/var/www/html
+    environment:
+      - PUID=1000  # 设置用户ID
+      - PGID=1000  # 设置组ID
       

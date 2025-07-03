@@ -32,6 +32,9 @@ Route::group([
     $router->post('queue-jobs/restart-queue', 'QueueJobController@restartQueue');
     $router->post('queue-jobs/delete-jobs', 'QueueJobController@deleteJobs');
 
+    // 队列任务执行记录
+    $router->resource('job-runs', 'JobRunController')->only(['index', 'show']);
+
     // 失败任务管理
     $router->resource('failed-jobs', 'FailedJobController');
     $router->post('failed-jobs/retry-jobs', 'FailedJobController@retryJobs');
