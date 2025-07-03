@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Mirror;
 use App\Models\SyncJob;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
@@ -43,15 +42,15 @@ class PhpMirrorService
     /**
      * 同步PHP镜像
      *
-     * @param Mirror $mirror 镜像对象
      * @param SyncJob $syncJob 同步任务
      * @return bool
      */
-    public function sync(Mirror $mirror, SyncJob $syncJob): bool
+    public function sync(SyncJob $syncJob): bool
     {
         $this->updateJobLog($syncJob, "开始同步PHP源码包...");
 
-        $config = $mirror->config;
+        // 从硬编码配置获取PHP配置
+        $config = config('mirror.php', []);
         $source = $config['source'] ?? 'https://www.php.net/distributions/';
         $versions = $config['versions'] ?? [];
 
@@ -76,16 +75,16 @@ class PhpMirrorService
     /**
      * 同步指定版本的PHP源码包
      *
-     * @param Mirror $mirror 镜像对象
      * @param SyncJob $syncJob 同步任务
      * @param string $majorVersion 主版本号
      * @return bool
      */
-    public function syncVersion(Mirror $mirror, SyncJob $syncJob, string $majorVersion): bool
+    public function syncVersion(SyncJob $syncJob, string $majorVersion): bool
     {
         $this->updateJobLog($syncJob, "同步PHP指定版本: {$majorVersion}");
 
-        $config = $mirror->config;
+        // 从硬编码配置获取版本信息
+        $config = config('mirror.php', []);
         $versionGroups = $config['versions'] ?? [];
 
         if (!isset($versionGroups[$majorVersion])) {

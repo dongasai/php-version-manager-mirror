@@ -2,7 +2,7 @@ services:
   # Laravel 开发环境
   app:
     image: ghcr.io/dongasai/php-version-manager-mirror:latest
-    container_name: pvm-mirror-laravel-dev
+    container_name: pvm-mirror-dev
     restart: unless-stopped
     ports:
       - "34403:80"

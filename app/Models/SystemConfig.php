@@ -28,6 +28,16 @@ class SystemConfig extends Model
         'key',
         'value',
         'description',
+        'enabled',
+    ];
+
+    /**
+     * 属性类型转换
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'enabled' => 'boolean',
     ];
 
     /**
@@ -178,6 +188,58 @@ class SystemConfig extends Model
     }
 
     /**
+     * 作用域：仅启用的配置
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeEnabled($query)
+    {
+        return $query->where('enabled', true);
+    }
+
+    /**
+     * 作用域：仅禁用的配置
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeDisabled($query)
+    {
+        return $query->where('enabled', false);
+    }
+
+    /**
+     * 检查配置是否启用
+     *
+     * @return bool
+     */
+    public function isEnabled(): bool
+    {
+        return $this->enabled;
+    }
+
+    /**
+     * 启用配置
+     *
+     * @return bool
+     */
+    public function enable(): bool
+    {
+        return $this->update(['enabled' => true]);
+    }
+
+    /**
+     * 禁用配置
+     *
+     * @return bool
+     */
+    public function disable(): bool
+    {
+        return $this->update(['enabled' => false]);
+    }
+
+    /**
      * 获取默认配置
      *
      * @return array
@@ -285,10 +347,11 @@ class SystemConfig extends Model
             self::firstOrCreate(
                 ['key' => $key],
                 [
-                    'value' => is_array($config['value']) || is_object($config['value']) 
+                    'value' => is_array($config['value']) || is_object($config['value'])
                         ? json_encode($config['value'], JSON_UNESCAPED_UNICODE)
                         : (string) $config['value'],
                     'description' => $config['description'],
+                    'enabled' => $config['enabled'] ?? true,
                 ]
             );
         }

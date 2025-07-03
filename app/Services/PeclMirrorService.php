@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Mirror;
 use App\Models\SyncJob;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
@@ -43,15 +42,15 @@ class PeclMirrorService
     /**
      * 同步PECL镜像
      *
-     * @param Mirror $mirror 镜像对象
      * @param SyncJob $syncJob 同步任务
      * @return bool
      */
-    public function sync(Mirror $mirror, SyncJob $syncJob): bool
+    public function sync(SyncJob $syncJob): bool
     {
         $this->updateJobLog($syncJob, "开始同步PECL扩展包...");
 
-        $config = $mirror->config;
+        // 从硬编码配置获取扩展列表
+        $config = config('mirror.pecl', []);
         $extensions = $config['extensions'] ?? [];
 
         if (empty($extensions)) {
@@ -85,16 +84,16 @@ class PeclMirrorService
     /**
      * 同步指定扩展
      *
-     * @param Mirror $mirror 镜像对象
      * @param SyncJob $syncJob 同步任务
      * @param string $extensionName 扩展名
      * @return bool
      */
-    public function syncExtension(Mirror $mirror, SyncJob $syncJob, string $extensionName): bool
+    public function syncExtension(SyncJob $syncJob, string $extensionName): bool
     {
         $this->updateJobLog($syncJob, "同步PECL指定扩展: {$extensionName}");
 
-        $config = $mirror->config;
+        // 从硬编码配置获取扩展列表
+        $config = config('mirror.pecl', []);
         $extensions = $config['extensions'] ?? [];
 
         // 查找指定扩展

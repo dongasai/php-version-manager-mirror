@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Mirror;
 use App\Models\SyncJob;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
@@ -43,16 +42,16 @@ class ExtensionMirrorService
     /**
      * 同步GitHub扩展镜像
      *
-     * @param Mirror $mirror 镜像对象
      * @param SyncJob $syncJob 同步任务
      * @return bool
      */
-    public function sync(Mirror $mirror, SyncJob $syncJob): bool
+    public function sync(SyncJob $syncJob): bool
     {
         $this->updateJobLog($syncJob, "开始同步GitHub扩展...");
 
-        $config = $mirror->config;
-        $extensions = $config['github_extensions'] ?? [];
+        // 从硬编码配置获取扩展列表
+        $config = config('mirror.github', []);
+        $extensions = $config['extensions'] ?? [];
 
         if (empty($extensions)) {
             $this->updateJobLog($syncJob, "错误: GitHub扩展配置为空");
@@ -83,17 +82,17 @@ class ExtensionMirrorService
     /**
      * 同步指定扩展
      *
-     * @param Mirror $mirror 镜像对象
      * @param SyncJob $syncJob 同步任务
      * @param string $extensionName 扩展名
      * @return bool
      */
-    public function syncExtension(Mirror $mirror, SyncJob $syncJob, string $extensionName): bool
+    public function syncExtension(SyncJob $syncJob, string $extensionName): bool
     {
         $this->updateJobLog($syncJob, "同步GitHub指定扩展: {$extensionName}");
 
-        $config = $mirror->config;
-        $extensions = $config['github_extensions'] ?? [];
+        // 从硬编码配置获取扩展列表
+        $config = config('mirror.github', []);
+        $extensions = $config['extensions'] ?? [];
 
         // 查找指定扩展
         $targetExtension = null;

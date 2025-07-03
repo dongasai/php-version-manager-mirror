@@ -18,16 +18,10 @@ use App\Http\Controllers\Api\StatusController;
 use App\Http\Controllers\Api\PhpController;
 use App\Http\Controllers\Api\PeclController;
 use App\Http\Controllers\Api\ComposerController;
-use App\Http\Controllers\Api\V1\MirrorController;
 use App\Http\Controllers\Api\V1\SyncJobController;
 
 // API v1 路由
 Route::prefix('v1')->name('v1.')->group(function () {
-    // 镜像管理
-    Route::apiResource('mirrors', MirrorController::class);
-    Route::post('mirrors/{mirror}/sync', [MirrorController::class, 'sync'])->name('mirrors.sync');
-    Route::get('mirrors/{mirror}/stats', [MirrorController::class, 'stats'])->name('mirrors.stats');
-
     // 同步任务管理
     Route::apiResource('sync-jobs', SyncJobController::class);
     Route::post('sync-jobs/{job}/cancel', [SyncJobController::class, 'cancel'])->name('sync-jobs.cancel');

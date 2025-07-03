@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Mirror;
 use App\Models\SyncJob;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
