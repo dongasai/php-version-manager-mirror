@@ -47,13 +47,15 @@ class HomeController extends Controller
         // 获取镜像统计信息
         $stats = [];
         foreach ($mirrors as $mirror) {
-            $mirrorStats = $this->mirrorService->getMirrorStats($mirror);
-            $stats[$mirror->type] = [
-                'name' => $mirror->name,
-                'file_count' => $mirrorStats['file_count'],
-                'total_size' => $mirrorStats['total_size'],
-                'last_updated' => $mirrorStats['last_updated'],
-            ];
+            if ($mirror) { // 确保镜像配置存在
+                $mirrorStats = $this->mirrorService->getMirrorStatsByType($mirror['type']);
+                $stats[$mirror['type']] = [
+                    'name' => $mirror['name'],
+                    'file_count' => $mirrorStats['file_count'],
+                    'total_size' => $mirrorStats['total_size'],
+                    'last_updated' => $mirrorStats['last_updated'],
+                ];
+            }
         }
 
         // 获取系统配置

@@ -35,8 +35,12 @@ class SystemConfigController extends AdminController
                 'json' => 'warning',
                 'text' => 'default',
             ]);
-            $grid->column('created_at', '创建时间');
-            $grid->column('updated_at', '更新时间');
+            $grid->column('created_at', '创建时间')->display(function ($value) {
+                return $value ? $value->format('Y-m-d H:i:s') : '-';
+            });
+            $grid->column('updated_at', '更新时间')->display(function ($value) {
+                return $value ? $value->format('Y-m-d H:i:s') : '-';
+            });
 
             $grid->filter(function (Grid\Filter $filter) {
                 $filter->equal('id');
@@ -68,8 +72,12 @@ class SystemConfigController extends AdminController
             $show->field('value', '配置值');
             $show->field('description', '描述');
             $show->field('type', '类型');
-            $show->field('created_at', '创建时间');
-            $show->field('updated_at', '更新时间');
+            $show->field('created_at', '创建时间')->as(function ($value) {
+                return $value ? $value->format('Y-m-d H:i:s') : '-';
+            });
+            $show->field('updated_at', '更新时间')->as(function ($value) {
+                return $value ? $value->format('Y-m-d H:i:s') : '-';
+            });
         });
     }
 

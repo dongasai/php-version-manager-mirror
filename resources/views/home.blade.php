@@ -61,18 +61,18 @@
         <div class="row g-4">
             @foreach($mirrors as $mirror)
             <div class="col-lg-6">
-                <div class="card mirror-card {{ $mirror->type }} h-100">
+                <div class="card mirror-card {{ $mirror['type'] }} h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-center mb-3">
                             <div class="me-3">
-                                @switch($mirror->type)
+                                @switch($mirror['type'])
                                     @case('php')
                                         <i class="fab fa-php fa-2x text-primary"></i>
                                         @break
                                     @case('pecl')
                                         <i class="fas fa-puzzle-piece fa-2x text-warning"></i>
                                         @break
-                                    @case('extension')
+                                    @case('github')
                                         <i class="fab fa-github fa-2x text-success"></i>
                                         @break
                                     @case('composer')
@@ -81,30 +81,28 @@
                                 @endswitch
                             </div>
                             <div>
-                                <h5 class="card-title mb-1">{{ $mirror->name }}</h5>
+                                <h5 class="card-title mb-1">{{ $mirror['name'] }}</h5>
                                 <div class="d-flex align-items-center">
-                                    <span class="status-indicator status-{{ $mirror->isEnabled() ? 'online' : 'offline' }}"></span>
-                                    <small class="text-muted">
-                                        {{ $mirror->isEnabled() ? '在线' : '离线' }}
-                                    </small>
+                                    <span class="status-indicator status-online"></span>
+                                    <small class="text-muted">在线</small>
                                 </div>
                             </div>
                         </div>
-                        
-                        @if(isset($stats[$mirror->type]))
+
+                        @if(isset($stats[$mirror['type']]))
                         <div class="row text-center mb-3">
                             <div class="col-4">
-                                <div class="fw-bold">{{ $stats[$mirror->type]['file_count'] }}</div>
+                                <div class="fw-bold">{{ $stats[$mirror['type']]['file_count'] }}</div>
                                 <small class="text-muted">文件数</small>
                             </div>
                             <div class="col-4">
-                                <div class="fw-bold">{{ formatBytes($stats[$mirror->type]['total_size']) }}</div>
+                                <div class="fw-bold">{{ formatBytes($stats[$mirror['type']]['total_size']) }}</div>
                                 <small class="text-muted">大小</small>
                             </div>
                             <div class="col-4">
                                 <div class="fw-bold">
-                                    @if($stats[$mirror->type]['last_updated'])
-                                        {{ \Carbon\Carbon::parse($stats[$mirror->type]['last_updated'])->diffForHumans() }}
+                                    @if($stats[$mirror['type']]['last_updated'])
+                                        {{ \Carbon\Carbon::parse($stats[$mirror['type']]['last_updated'])->diffForHumans() }}
                                     @else
                                         未知
                                     @endif
@@ -115,14 +113,14 @@
                         @endif
                         
                         <p class="card-text text-muted mb-3">
-                            @switch($mirror->type)
+                            @switch($mirror['type'])
                                 @case('php')
                                     PHP 官方源码包，包含各个版本的完整源代码
                                     @break
                                 @case('pecl')
                                     PECL 扩展包，提供丰富的 PHP 扩展功能
                                     @break
-                                @case('extension')
+                                @case('github')
                                     GitHub 上的热门 PHP 扩展项目
                                     @break
                                 @case('composer')
@@ -130,12 +128,12 @@
                                     @break
                             @endswitch
                         </p>
-                        
+
                         <div class="d-flex gap-2">
-                            <a href="/{{ $mirror->type }}" class="btn btn-primary btn-sm">
+                            <a href="/{{ $mirror['type'] }}" class="btn btn-primary btn-sm">
                                 <i class="fas fa-folder-open me-1"></i>浏览文件
                             </a>
-                            <a href="/api/{{ $mirror->type }}" class="btn btn-outline-secondary btn-sm">
+                            <a href="/api/{{ $mirror['type'] }}" class="btn btn-outline-secondary btn-sm">
                                 <i class="fas fa-code me-1"></i>API
                             </a>
                         </div>

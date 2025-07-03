@@ -2,7 +2,6 @@
 
 namespace App\Admin\Controllers;
 
-use App\Models\Mirror;
 use App\Models\SyncJob;
 use App\Models\AccessLog;
 use App\Http\Controllers\Controller;
@@ -21,14 +20,16 @@ class HomeController extends Controller
             ->body(function (Row $row) {
                 // 统计卡片
                 $row->column(3, function (Column $column) {
-                    $mirrorCount = Mirror::count();
-                    $activeMirrors = Mirror::where('status', 1)->count();
+                    // 硬编码配置的镜像类型数量
+                    $mirrorTypes = ['php', 'pecl', 'github', 'composer'];
+                    $mirrorCount = count($mirrorTypes);
+                    $activeMirrors = $mirrorCount; // 所有硬编码镜像都是启用的
 
-                    $column->append(new Card('镜像总数', '
+                    $column->append(new Card('镜像类型', '
                         <div class="text-center">
-                            <h2 class="text-primary">' . $mirrorCount . ' 个</h2>
-                            <p class="text-muted">' . $activeMirrors . ' 个启用</p>
-                            <a href="/admin/mirrors" class="btn btn-sm btn-outline-primary">查看详情</a>
+                            <h2 class="text-primary">' . $mirrorCount . ' 种</h2>
+                            <p class="text-muted">' . $activeMirrors . ' 种启用</p>
+                            <a href="/admin/sync-jobs" class="btn btn-sm btn-outline-primary">查看同步</a>
                         </div>
                     '));
                 });
@@ -74,8 +75,7 @@ class HomeController extends Controller
 
                 // 最近任务和系统信息
                 $row->column(6, function (Column $column) {
-                    $recentJobs = SyncJob::with('mirror')
-                        ->orderBy('created_at', 'desc')
+                    $recentJobs = SyncJob::orderBy('created_at', 'desc')
                         ->limit(5)
                         ->get();
 
@@ -107,10 +107,18 @@ class HomeController extends Controller
                 'cancelled' => 'warning',
             ][$job->status] ?? 'secondary';
 
+            $types = [
+                'php' => 'PHP源码',
+                'pecl' => 'PECL扩展',
+                'github' => 'GitHub扩展',
+                'composer' => 'Composer包',
+            ];
+            $mirrorName = $types[$job->mirror_type] ?? $job->mirror_type;
+
             $html .= '<tr>';
-            $html .= '<td>' . ($job->mirror->name ?? 'N/A') . '</td>';
+            $html .= '<td>' . $mirrorName . '</td>';
             $html .= '<td><span class="badge badge-' . $statusClass . '">' . $job->status . '</span></td>';
-            $html .= '<td>' . $job->created_at->format('m-d H:i') . '</td>';
+            $html .= '<td>' . $job->created_at->format('Y-m-d H:i:s') . '</td>';
             $html .= '</tr>';
         }
 

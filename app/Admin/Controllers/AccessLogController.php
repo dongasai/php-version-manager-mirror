@@ -41,7 +41,9 @@ class AccessLogController extends AdminController
                 return $this->formatBytes($size);
             });
             $grid->column('user_agent', '用户代理')->limit(30);
-            $grid->column('created_at', '访问时间');
+            $grid->column('created_at', '访问时间')->display(function ($value) {
+                return $value ? $value->format('Y-m-d H:i:s') : '-';
+            });
 
             $grid->filter(function (Grid\Filter $filter) {
                 $filter->equal('id');
@@ -95,7 +97,9 @@ class AccessLogController extends AdminController
             });
             $show->field('referer', '来源页面');
             $show->field('user_agent', '用户代理');
-            $show->field('created_at', '访问时间');
+            $show->field('created_at', '访问时间')->as(function ($value) {
+                return $value ? $value->format('Y-m-d H:i:s') : '-';
+            });
         });
     }
 

@@ -1,0 +1,4 @@
+# Laravel 计划任务
+* * * * * www-data cd /var/www/html && php artisan schedule:run >> /dev/null 2>&1
+
+# 空行必须存在

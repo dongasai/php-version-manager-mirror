@@ -18,7 +18,6 @@ class SyncJob extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'mirror_id',
         'mirror_type',
         'status',
         'progress',
@@ -33,7 +32,6 @@ class SyncJob extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'mirror_id' => 'integer',
         'progress' => 'integer',
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
@@ -253,13 +251,20 @@ class SyncJob extends Model
     }
 
     /**
-     * 关联镜像
+     * 获取镜像类型名称
      *
-     * @return \Illuminate\Database\Eloquent\BelongsTo
+     * @return string
      */
-    public function mirror()
+    public function getMirrorTypeNameAttribute(): string
     {
-        return $this->belongsTo(Mirror::class);
+        $types = [
+            'php' => 'PHP源码',
+            'pecl' => 'PECL扩展',
+            'github' => 'GitHub扩展',
+            'composer' => 'Composer包',
+        ];
+
+        return $types[$this->mirror_type] ?? $this->mirror_type;
     }
 
     /**

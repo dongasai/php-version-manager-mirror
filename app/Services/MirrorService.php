@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Mirror;
 use App\Models\SyncJob;
 use App\Jobs\SyncMirrorJob;
 use Illuminate\Support\Facades\Log;
@@ -127,77 +126,7 @@ class MirrorService
         }
     }
 
-    /**
-     * 创建镜像
-     *
-     * @param array $data 镜像数据
-     * @return Mirror
-     */
-    public function createMirror(array $data): Mirror
-    {
-        $mirror = Mirror::create([
-            'name' => $data['name'],
-            'type' => $data['type'],
-            'url' => $data['url'],
-            'status' => $data['status'] ?? 1,
-            'config' => $data['config'] ?? [],
-        ]);
 
-        Log::info("镜像创建成功", ['mirror_id' => $mirror->id, 'name' => $mirror->name]);
-
-        return $mirror;
-    }
-
-    /**
-     * 更新镜像
-     *
-     * @param int $id 镜像ID
-     * @param array $data 更新数据
-     * @return bool
-     */
-    public function updateMirror(int $id, array $data): bool
-    {
-        try {
-            $mirror = Mirror::findOrFail($id);
-            $mirror->update($data);
-
-            Log::info("镜像更新成功", ['mirror_id' => $id]);
-
-            return true;
-        } catch (\Exception $e) {
-            Log::error("镜像更新失败", [
-                'mirror_id' => $id,
-                'error' => $e->getMessage()
-            ]);
-
-            return false;
-        }
-    }
-
-    /**
-     * 删除镜像
-     *
-     * @param int $id 镜像ID
-     * @return bool
-     */
-    public function deleteMirror(int $id): bool
-    {
-        try {
-            $mirror = Mirror::findOrFail($id);
-            $mirror->delete();
-
-            Log::info("镜像删除成功", ['mirror_id' => $id]);
-
-            return true;
-        } catch (\Exception $e) {
-            Log::error("镜像删除失败", [
-                'mirror_id' => $id,
-                'error' => $e->getMessage()
-            ]);
-
-            return false;
-        }
-    }
 
     /**
      * 同步指定类型的镜像
@@ -269,40 +198,38 @@ class MirrorService
     }
 
     /**
-     * 获取镜像状态
+     * 获取镜像类型状态
      *
-     * @param int $mirrorId 镜像ID
+     * @param string $mirrorType 镜像类型
      * @return array
      */
-    public function getMirrorStatus(int $mirrorId): array
+    public function getMirrorTypeStatus(string $mirrorType): array
     {
-        $mirror = Mirror::findOrFail($mirrorId);
-        
         // 获取最新的同步任务
-        $latestJob = SyncJob::where('mirror_id', $mirrorId)
+        $latestJob = SyncJob::where('mirror_type', $mirrorType)
                            ->orderBy('created_at', 'desc')
                            ->first();
 
         // 获取文件统计
-        $stats = $this->getMirrorStats($mirror);
+        $stats = $this->getMirrorTypeStats($mirrorType);
 
         return [
-            'mirror' => $mirror,
+            'mirror_type' => $mirrorType,
             'latest_job' => $latestJob,
             'stats' => $stats,
         ];
     }
 
     /**
-     * 获取镜像统计信息
+     * 获取镜像类型统计信息
      *
-     * @param Mirror $mirror 镜像对象
+     * @param string $mirrorType 镜像类型
      * @return array
      */
-    public function getMirrorStats(Mirror $mirror): array
+    public function getMirrorTypeStats(string $mirrorType): array
     {
         $dataDir = $this->configService->getDataDir();
-        $mirrorDir = $dataDir . '/' . $mirror->type;
+        $mirrorDir = $dataDir . '/' . $mirrorType;
 
         if (!is_dir($mirrorDir)) {
             return [
@@ -338,6 +265,8 @@ class MirrorService
             'last_updated' => $lastUpdated ? date('Y-m-d H:i:s', $lastUpdated) : null,
         ];
     }
+
+
 
     /**
      * 处理文件下载请求

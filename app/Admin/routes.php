@@ -14,9 +14,6 @@ Route::group([
 
     $router->get('/', 'HomeController@index');
 
-    // 镜像管理
-    $router->resource('mirrors', 'MirrorController');
-
     // 同步任务管理
     $router->resource('sync-jobs', 'SyncJobController');
 

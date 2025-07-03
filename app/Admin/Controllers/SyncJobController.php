@@ -19,7 +19,20 @@ class SyncJobController extends AdminController
     {
         return Grid::make(new SyncJob(), function (Grid $grid) {
             $grid->column('id')->sortable();
-            $grid->column('mirror.name', '镜像名称');
+            $grid->column('mirror_type', '镜像类型')->display(function ($value) {
+                $types = [
+                    'php' => 'PHP源码',
+                    'pecl' => 'PECL扩展',
+                    'github' => 'GitHub扩展',
+                    'composer' => 'Composer包',
+                ];
+                return $types[$value] ?? $value;
+            })->label([
+                'php' => 'primary',
+                'pecl' => 'success',
+                'github' => 'info',
+                'composer' => 'warning',
+            ]);
             $grid->column('status', '状态')->using([
                 'pending' => '等待中',
                 'running' => '运行中',
@@ -34,13 +47,24 @@ class SyncJobController extends AdminController
                 'cancelled' => 'warning',
             ]);
             $grid->column('progress', '进度')->progressBar();
-            $grid->column('started_at', '开始时间');
-            $grid->column('completed_at', '完成时间');
-            $grid->column('created_at', '创建时间');
+            $grid->column('started_at', '开始时间')->display(function ($value) {
+                return $value ? $value->format('Y-m-d H:i:s') : '-';
+            });
+            $grid->column('completed_at', '完成时间')->display(function ($value) {
+                return $value ? $value->format('Y-m-d H:i:s') : '-';
+            });
+            $grid->column('created_at', '创建时间')->display(function ($value) {
+                return $value ? $value->format('Y-m-d H:i:s') : '-';
+            });
 
             $grid->filter(function (Grid\Filter $filter) {
                 $filter->equal('id');
-                $filter->equal('mirror_id', '镜像')->select('/admin/api/mirrors');
+                $filter->equal('mirror_type', '镜像类型')->select([
+                    'php' => 'PHP源码',
+                    'pecl' => 'PECL扩展',
+                    'github' => 'GitHub扩展',
+                    'composer' => 'Composer包',
+                ]);
                 $filter->equal('status', '状态')->select([
                     'pending' => '等待中',
                     'running' => '运行中',
@@ -80,16 +104,34 @@ class SyncJobController extends AdminController
     {
         return Show::make($id, new SyncJob(), function (Show $show) {
             $show->field('id');
-            $show->field('mirror.name', '镜像名称');
+            $show->field('mirror_type', '镜像类型')->as(function ($value) {
+                $types = [
+                    'php' => 'PHP源码',
+                    'pecl' => 'PECL扩展',
+                    'github' => 'GitHub扩展',
+                    'composer' => 'Composer包',
+                ];
+                return $types[$value] ?? $value;
+            });
             $show->field('status', '状态');
             $show->field('progress', '进度')->as(function ($progress) {
                 return $progress . '%';
             });
-            $show->field('log', '日志信息')->code();
-            $show->field('started_at', '开始时间');
-            $show->field('completed_at', '完成时间');
-            $show->field('created_at', '创建时间');
-            $show->field('updated_at', '更新时间');
+            $show->field('log', '日志信息')->unescape()->as(function ($log) {
+                return $log ? '<pre style="background: #f8f9fa; padding: 10px; border-radius: 4px; max-height: 300px; overflow-y: auto;">' . htmlspecialchars($log) . '</pre>' : '-';
+            });
+            $show->field('started_at', '开始时间')->as(function ($value) {
+                return $value ? (is_string($value) ? $value : $value->format('Y-m-d H:i:s')) : '-';
+            });
+            $show->field('completed_at', '完成时间')->as(function ($value) {
+                return $value ? (is_string($value) ? $value : $value->format('Y-m-d H:i:s')) : '-';
+            });
+            $show->field('created_at', '创建时间')->as(function ($value) {
+                return $value ? (is_string($value) ? $value : $value->format('Y-m-d H:i:s')) : '-';
+            });
+            $show->field('updated_at', '更新时间')->as(function ($value) {
+                return $value ? (is_string($value) ? $value : $value->format('Y-m-d H:i:s')) : '-';
+            });
         });
     }
 
@@ -102,7 +144,12 @@ class SyncJobController extends AdminController
     {
         return Form::make(new SyncJob(), function (Form $form) {
             $form->display('id');
-            $form->select('mirror_id', '镜像')->options('/admin/api/mirrors')->required();
+            $form->select('mirror_type', '镜像类型')->options([
+                'php' => 'PHP源码',
+                'pecl' => 'PECL扩展',
+                'github' => 'GitHub扩展',
+                'composer' => 'Composer包',
+            ])->required();
             $form->select('status', '状态')->options([
                 'pending' => '等待中',
                 'running' => '运行中',

@@ -130,6 +130,16 @@ class MirrorConfigService
     }
 
     /**
+     * 获取GitHub配置 (别名方法，用于兼容)
+     *
+     * @return array
+     */
+    public function getGithubConfig(): array
+    {
+        return $this->getMirrorConfig('extensions', []);
+    }
+
+    /**
      * 获取GitHub扩展配置
      *
      * @return array
