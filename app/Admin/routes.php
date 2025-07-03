@@ -14,6 +14,9 @@ Route::group([
 
     $router->get('/', 'HomeController@index');
 
+    // 队列监控仪表板
+    $router->get('queue-dashboard', 'QueueDashboardController@index');
+
     // 同步任务管理
     $router->resource('sync-jobs', 'SyncJobController');
 
@@ -22,5 +25,18 @@ Route::group([
 
     // 访问日志
     $router->resource('access-logs', 'AccessLogController');
+
+    // 队列任务管理
+    $router->resource('queue-jobs', 'QueueJobController');
+    $router->post('queue-jobs/clear-queue', 'QueueJobController@clearQueue');
+    $router->post('queue-jobs/restart-queue', 'QueueJobController@restartQueue');
+    $router->post('queue-jobs/delete-jobs', 'QueueJobController@deleteJobs');
+
+    // 失败任务管理
+    $router->resource('failed-jobs', 'FailedJobController');
+    $router->post('failed-jobs/retry-jobs', 'FailedJobController@retryJobs');
+    $router->post('failed-jobs/retry-all', 'FailedJobController@retryAllJobs');
+    $router->post('failed-jobs/clear-all', 'FailedJobController@clearFailedJobs');
+    $router->post('failed-jobs/delete-jobs', 'FailedJobController@deleteJobs');
 
 });

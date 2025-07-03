@@ -268,6 +268,28 @@ class SyncJob extends Model
     }
 
     /**
+     * 获取同步任务统计信息
+     *
+     * @return array
+     */
+    public static function getSyncJobStats(): array
+    {
+        $total = static::count();
+        $running = static::where('status', 'running')->count();
+        $completed = static::where('status', 'completed')->count();
+        $failed = static::where('status', 'failed')->count();
+        $pending = static::where('status', 'pending')->count();
+
+        return [
+            'total' => $total,
+            'running' => $running,
+            'completed' => $completed,
+            'failed' => $failed,
+            'pending' => $pending,
+        ];
+    }
+
+    /**
      * 作用域：正在运行的任务
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
