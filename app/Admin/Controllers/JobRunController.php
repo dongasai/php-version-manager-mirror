@@ -3,7 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Models\JobRun;
-use Dcat\Admin\Controllers\AdminController;
+use Dcat\Admin\Http\Controllers\AdminController;
 use Dcat\Admin\Grid;
 use Dcat\Admin\Show;
 use Dcat\Admin\Layout\Content;
@@ -65,7 +65,10 @@ class JobRunController extends AdminController
                     JobRun::STATUS_TIMEOUT => 'secondary',
                 ];
 
-                return "<span class='label label-{$colors[$value]}'>{$this->status_label}</span>";
+                $statusOptions = JobRun::getStatusOptions();
+                $label = $statusOptions[$value] ?? $value;
+
+                return "<span class='label label-{$colors[$value]}'>{$label}</span>";
             });
 
             $grid->column('execution_time', '执行时间')->display(function ($value) {
@@ -73,7 +76,20 @@ class JobRunController extends AdminController
             })->sortable();
 
             $grid->column('memory_usage', '内存使用')->display(function ($value) {
-                return $this->formatted_memory_usage ?: '-';
+                if (!$value) {
+                    return '-';
+                }
+
+                $units = ['B', 'KB', 'MB', 'GB'];
+                $bytes = $value;
+                $i = 0;
+
+                while ($bytes >= 1024 && $i < count($units) - 1) {
+                    $bytes /= 1024;
+                    $i++;
+                }
+
+                return round($bytes, 2) . ' ' . $units[$i];
             });
 
             $grid->column('started_at', '开始时间')->sortable();
@@ -93,7 +109,7 @@ class JobRunController extends AdminController
                 $filter->equal('status', '状态')->select(JobRun::getStatusOptions());
 
                 $filter->between('started_at', '开始时间')->datetime();
-                $filter->between('execution_time', '执行时间(秒)')->decimal();
+                $filter->between('execution_time', '执行时间(秒)');
             });
 
             // 工具栏
